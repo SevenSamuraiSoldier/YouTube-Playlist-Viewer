@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>YouTube Playlist Viewer</title>
+    <meta charset="UTF-8" />
+    <meta name="YouTube Playlist Viewer" content="Single Page App" />
+    <link rel="icon" type="image/png" href="flavicon.png">
+    <meta name="keywords" content="HTML, CSS, JavaScript" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        :root {
+            --bg-color-light: #f5f5f5;
+            --text-color-light: #333;
+            --bg-color-dark: #272727;
+            --text-color-dark: #adadad;
+            --bg-color--btn-light:#f5f5f5;
+            --bg-color--btn-dark:#4a4a4a;
+            --text-color-title-dark:#adadad;
+            --text-color-videolink-light: #6e6e6e;
+            --text-color-videolink-dark:#adadad;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e9e9e9;
+        }
+        body {
+            background-color: var(--bg-color-light);
+            color: var(--text-color-light);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body.dark-mode {
+            background-color: var(--bg-color-dark);
+            color: var(--text-color-dark);
+        }
+        
+        #playlist-container {
+            
+            margin: 40px 10px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        #playlist-container h2 {
+            margin-top: 0;
+        }
+        #video-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        #video-list li {
+            display: flex;
+            align-items: center;
+            margin-block: 0.3em;
+            border: 0.1em solid #8c8888;
+            border-radius: 0.5em;
+            padding: 0.5em;
+            transition: 0.25s;
+        }
+        
+        #video-list li:hover {
+            transform: scale(1.01);
+        }
+        
+        #video-list li img {
+            width: 80px;
+            height: auto;
+            border-radius: 5px;
+            margin-right: 20px;
+        }
+        #video-list li a {
+            text-decoration: none;
+            /*color: #8b8a8a;*/
+            color: #919191;
+        
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        a.dark-mode {
+            color: var(--text-color-videolink-dark)
+        }
+        #playlist-link {
+            margin-bottom: 0.5em;
+            margin-left: 5px;
+            width: 60%;
+
+            padding: 0.6em;
+            /*
+            color: #545151;
+            color: #666;
+            color: #888888;
+            */
+            font-size: 0.9em;
+            border: 0.1em solid #8c8888;
+            border-radius: 0.3em;
+        }
+        h2 {
+
+            color: #8c8888;
+            margin-left: 15px;
+            font-size: 12px;
+            margin-bottom: 2px;
+            font-weight: 500;
+        }
+        h1 {
+            
+            color: #626262;
+            text-align: center;
+        }
+        h1.dark-mode {
+            color: var(--text-color-title-dark);
+        }
+
+        span,
+        .video-link {
+            transition: transform 0.3s, margin-left 0.3s;
+        }
+        /*
+        span:hover,
+        .video-link:hover {
+            transform: translateX(50px) scale(1.2);
+        }
+        */
+        .parentdiv1 {
+            display: flex;
+            flex-direction: row;
+            /*flex-wrap: wrap; */
+            justify-content:space-between;
+            align-content: center;
+            align-items: center;
+            margin-top: 10px;
+        }
+        #search-bar,
+        #search-bar2 {
+            margin-right: 150px;
+            margin-left: 5px;
+            width: 35%;
+            /*
+            width: 35em;
+            font-size: medium; */
+            padding: 0.6em;
+            /*color: #545151;  */
+            font-size: 0.9em;
+            border: 0.1em solid #8c8888;
+            border-radius: 0.3em;
+        }
+        #video-list li .video-info .channel-name {
+            font-size: 0.8em;
+            color: #666;
+        }
+        button {
+            border: 0.1em solid #8c8888;
+            border-radius: 0.5em;
+            /* border-style: dotted; */
+            padding-top: 0.3em;
+            padding-bottom: 0.3em;
+            transition: 0.2s;
+            color: #545151;
+            padding-block: 0.7em;
+            min-width: 4em;
+            margin-left: 0.5em;
+        }
+        button.dark-mode {
+            color: #d7d7d7;
+            color: var(--text-color-dark);
+            background-color: var(--bg-color--btn-dark);
+
+        }
+        button:hover {
+            transform: scale(1.1);
+            background-color: #e7e7e7;
+        }
+        
+
+        input[type="file"]::file-selector-button {
+            border: 0.1em solid #8c8888;
+            border-radius: 0.5em;
+            /* border-style: dotted; */
+            padding-top: 0.3em;
+            padding-bottom: 0.3em;
+            transition: 0.2s;
+            color: #545151;
+            padding-block: 0.7em;
+            min-width: 4em;
+            margin-left: 0.5em;
+
+        }
+        input[type="file"]::file-selector-button.dark-mode {
+            color: #d7d7d7;
+            color: var(--text-color-dark);
+            background-color: var(--bg-color--btn-dark);
+
+        }
+        #video-count {
+            padding-right: 5px;
+            color: #8c8888;
+        }
+        #download-csv {
+            min-width: none;
+            width: 4em;
+        }
+
+        .toggle-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: var(--text-color-light);
+            color: var(--bg-color-light);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: larger;
+            min-width:auto;
+        }
+
+        .toggle-btn:hover {
+            background-color: #555;
+        }
+        input {
+            color: #888888;
+
+        }
+        input.dark-mode {
+            background-color: var(--bg-color-dark);
+            color: var(--text-color-title-dark);
+        }
+        #csvFile {
+            /*margin-left: 5px; */
+            background-color:var(--bg-color--btn-light);
+            margin-bottom: 10px;
+            opacity: 0%;
+            z-index: 1;
+        }
+        
+        #csvFile.dark-mode {
+            background-color: var(--bg-color-dark);
+            color: var(--text-color-title-dark);
+        }
+        .csv-File-Panel{
+            position: relative;
+        }
+        #coverup-Btn {
+            position: absolute;
+            top:0px;
+            left: 0px;
+        }
+        #api-key {
+            width: 50%;
+            margin-inline: 300px;
+            text-align: center;
+
+            padding: 0.6em;
+            color: #545151;
+            font-size: 0.9em;
+            border: 0.1em solid #8c8888;
+            border-radius: 0.3em;
+        }
+
+
+
+        @media (max-aspect-ratio: 1/1) {
+            h1 {
+                font-size: 32px;
+                text-align: start;
+                padding-left: 15px;
+            }
+            #playlist-container {
+                
+                margin: 20px 0;
+                padding: 10px;
+            }
+
+            #video-list li {
+                flex-direction: column;
+                align-items:center;
+                text-align: center;
+            }
+
+            #video-list li img {
+                width: 100%;
+                height: auto;
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+
+            .parentdiv1 {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            #search-bar,
+            #search-bar2 {
+                width: 90%;
+                margin-right: 0;
+                margin-left: 0;
+                margin-bottom: 10px;
+            }
+
+            button {
+                margin-left: 5px;
+                margin-bottom: 10px;
+            }
+            
+            .toggle-btn {
+                top: 5px;
+                right: 10px;
+                font-size: 14px; /* old value 9px*/
+                padding: 7px 11px; /* old value 10px 15px*/
+            }
+            #api-key {
+                width: 90%;
+                margin-inline: 8px;
+
+            }
+
+        }
+        
+        
+
+
+    </style>
+</head>
+<body>
+    <button class="toggle-btn">&#9680;</button>
+    <h1 id="main-title">YouTube Playlist Viewer</h1>
+    <input type="password" id="api-key" placeholder="Enter YouTube API Key...." >
+    <div id="playlist-container">
+        <h2>Enter YouTube Playlist Link:</h2>
+        <input id="playlist-link" type="text" placeholder="">
+        <button id="get-playlist">Get Playlist</button>
+        <button id="new-playlist">New List</button>
+        <button id="download-csv">CSV</button>
+        <div class="csv-File-Panel">
+            <button id="coverup-Btn">Press Here To Import CSV</button>
+            <input type="file" id="csvFile" accept=".csv">
+            <button id="importButton">Display CSV</button>
+
+        </div>
+        
+        
+        <div class="parentdiv1">
+            <input id="search-bar" type="text" placeholder="Search for Videos...">
+            <input id="search-bar2" type="text" placeholder="Search for Channels...">
+            <p id="video-count"></p>
+            
+        </div>
+        
+        <ul id="video-list" class="video-list"></ul>
+    </div>
+
+    <script>
+        var API_KEY = '';
+        const apiKeyInput = document.getElementById('api-key');
+        const playlistLinkInput = document.getElementById('playlist-link');
+        const getPlaylistButton = document.getElementById('get-playlist');
+        const newPlaylistButton = document.getElementById('new-playlist');
+        const downloadCSVButton = document.getElementById('download-csv');
+        const searchBar = document.getElementById('search-bar');
+        const searchBar2 = document.getElementById('search-bar2');
+        const videoList = document.getElementById('video-list');
+        var videoCountElement = document.getElementById('video-count');
+        const mainTitle = document.getElementById('main-title');
+        var listPanel = document.getElementById('video-list');
+        var csvFileInput = document.getElementById('csvFile');
+        var importButton = document.getElementById('importButton');
+        var coverupButton = document.getElementById('coverup-Btn');
+
+        let allVideos = [];
+        const toggleBtn = document.querySelector('.toggle-btn');
+        const body = document.body;
+        var flag_darkMode = 0;
+        var flag_csvMode = 3; //3 means no mode is on, 1 means csvmode is true, 0 means ytvideo mode is on
+
+
+        getPlaylistButton.addEventListener('click', () => {
+            const playlistLink = playlistLinkInput.value;
+            API_KEY = apiKeyInput.value;
+            if (playlistLink.includes('playlist?list=')) {
+                fetchPlaylist(playlistLink);
+                flag_csvMode = 0;
+            } else {
+                alert('Invalid playlist link. Please enter a valid YouTube playlist link.');
+            }
+        });
+
+        newPlaylistButton.addEventListener('click', () => {
+            allVideos = [];
+            videoList.innerHTML = '';
+            videoCountElement.textContent = '';
+            playlistLinkInput.value = "";
+            flag_csvMode = 3;
+        });
+
+        downloadCSVButton.addEventListener('click', () => {
+            if (flag_csvMode == 0) {
+                downloadCSV(allVideos);
+                //console.log("Downloading CSV file from Youtube");
+            }else if (flag_csvMode == 1) {
+                downloadCSVFromCSVData(allVideos);
+                //console.log("Downloading CSV file from CSV Data");
+            }
+            else {
+                console.log("Download Error");   
+            }
+            
+        });
+
+
+        searchBar.addEventListener('input', () => {
+            if (flag_csvMode == 0) {
+                filterVideos();
+                //console.log("Filtering YT VIdeos");
+            }else if (flag_csvMode == 1) {
+                filterVideosCSV();
+            }
+            else {
+                console.log("Error");   
+            }
+            
+        });
+        searchBar2.addEventListener('input', () => {
+            if (flag_csvMode == 0) {
+                filterChannels();
+                //console.log("Filtering YT Channels");
+            }else if (flag_csvMode == 1) {
+                
+                filterChannelsCSV();
+            }
+            else {
+                console.log("Error");   
+            }
+        });
+
+        toggleBtn.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            playlistLinkInput.classList.toggle('dark-mode');
+            searchBar.classList.toggle('dark-mode');
+            searchBar2.classList.toggle('dark-mode');
+            getPlaylistButton.classList.toggle('dark-mode');
+            newPlaylistButton.classList.toggle('dark-mode');
+            downloadCSVButton.classList.toggle('dark-mode');
+            mainTitle.classList.toggle('dark-mode');
+            listPanel.classList.toggle('dark-mode');
+            importButton.classList.toggle('dark-mode');
+            csvFileInput.classList.toggle('dark-mode');
+            coverupButton.classList.toggle('dark-mode');
+            apiKeyInput.classList.toggle('dark-mode');
+            //fileButton.classList.toggle('dark-mode');
+
+            
+            if (flag_darkMode ==0){
+                toggleBtn.innerHTML ="&#9681;";
+                //fileButton.style.backgroundColor = 'blue';
+                flag_darkMode = 1;
+            } else {
+                toggleBtn.innerHTML = "&#9680;";
+                flag_darkMode = 0;
+            }
+        });
+
+        window.addEventListener('load', function() {
+            // Code to be executed when the page is loaded
+            toggleBtn.click();
+            
+        });
+
+        function application_closing_prompt(e) {
+            if (!e) e = window.event;
+            //e.cancelBubble is supported by IE - this will kill the bubbling process.
+            e.cancelBubble = true;
+            e.returnValue = "You sure you want to leave?"; //This is displayed on the dialog
+
+            //e.stopPropagation works in Firefox.
+            if (e.stopPropagation) {
+            e.stopPropagation();
+            e.preventDefault();
+            }
+        }
+        window.onbeforeunload = application_closing_prompt;
+
+        /*
+        coverupButton.addEventListener('click', () =>{
+            importButton.click();
+        }); */
+
+        importButton.addEventListener('click', () => {
+            const file = csvFileInput.files[0];
+            if (!file) {
+                alert('Please select a CSV file');
+                return;
+            }
+            flag_csvMode = 1;
+            //videoList.innerHTML = '';
+            var videoCount = 0;
+            var errorCount = 0;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const csvData = event.target.result;
+                //allVideos = csvData.split('\n');
+                var newCSVData = csvData.split('\n');
+                allVideos = allVideos.concat(newCSVData);
+                allVideos.forEach((row, index) => {
+                    if (index > -1) {
+                        const parts = row.split(',');
+                        //console.log(parts);
+                        // Get the last three elements from the array in the desired order
+                        var videoLink = parts[parts.length - 1];
+                        videoLink = videoLink.replace(/"/g, '');
+                        //console.log("link: " + videoLink);
+                        var channelName = parts[parts.length - 2];
+                        channelName = channelName.replace(/"/g, '');
+                        //console.log(channelName);
+                        var videoTitle = parts.slice(0, parts.length - 2).join(',');
+                        videoTitle = videoTitle.replace(/"/g, '');
+                        //console.log(videoTitle);
+                        if (videoTitle === "Private video" || videoTitle === "Deleted video" 
+                        || typeof videoTitle === 'undefined' || videoTitle == "Video Title") {
+                            //console.log(errorCount);
+                            //console.log(videoTitle);
+                            errorCount++;
+                            return;
+                        }
+
+                        const videoListItem = document.createElement('li');
+                        videoListItem.innerHTML = `
+                            <a href="${videoLink}" target="_blank">
+                                
+                                <div class="video-info">
+                                    <a href="${videoLink}" target="_blank" class="video-link">${videoTitle} </a>
+                                    <span class="channel-name">${channelName}</span>
+                                </div>
+                                
+                            </a>
+                            `;
+                            videoList.appendChild(videoListItem);
+                        videoCount ++;
+                        //console.log("Count: " + videoCount);
+                        videoCountElement.innerText = "No. of Videos: " + videoCount;
+                    };
+                    
+                });
+                console.log("Error Count: "+errorCount);
+                    
+            };
+            reader.readAsText(file);
+        });
+
+        async function fetchPlaylist(playlistLink) {
+            try {
+                let nextPageToken = '';
+                
+
+                while (true) {
+                    const response = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${playlistLink.split('playlist?list=')[1].split('&')[0]}&key=${API_KEY}&pageToken=${nextPageToken}`);
+                    const data = await response.json();
+                    allVideos = allVideos.concat(data.items);
+
+                    if (!data.nextPageToken) {
+                        break;
+                    }
+
+                    nextPageToken = data.nextPageToken;
+                }
+                
+                videoList.innerHTML = '';
+                var videoCount = 0;
+                var errorCount = 1;
+                allVideos.forEach((item) => {
+                    const videoTitle = item.snippet.title;
+                    if (videoTitle === "Private video" || videoTitle === "Deleted video" 
+                    || typeof videoTitle === 'undefined') {
+                        //console.log(errorCount);
+                        errorCount++;
+                        return;
+                    }
+                    const channelName = item.snippet.videoOwnerChannelTitle;
+                    const videoId = item.snippet.resourceId.videoId;
+                    const videoLink = `https://www.youtube.com/watch?v=${videoId}`;
+                    const videoThumbnail = item.snippet.thumbnails.medium.url;
+                    const videoListItem = document.createElement('li');
+                    videoListItem.innerHTML = `
+                        <a href="${videoLink}" target="_blank">
+                            <img src="${videoThumbnail}" alt="${videoTitle}">
+                            <div class="video-info">
+                                <a href="${videoLink}" target="_blank" class="video-link">${videoTitle} </a>
+                                <span class="channel-name">${channelName}</span>
+                            </div>
+                            
+                        </a>
+                    `;
+                    // <span>${videoTitle}</span>
+                    videoList.appendChild(videoListItem);
+                    videoCount ++;
+                    //console.log("Count: " + videoCount);
+                    videoCountElement.innerText = "No. of Videos: " + videoCount;
+                });
+                console.log("Error Count: "+errorCount);
+            } catch (error) {
+                console.error(error);
+                alert('Error fetching playlist. Please check your API key or the playlist link.');
+            }
+        }
+
+        function filterVideos() {
+            const searchTerm = searchBar.value.toLowerCase();
+            const filteredVideos = allVideos.filter((item) => {
+                const videoTitle = item.snippet.title;
+                if (videoTitle === "Private video" || videoTitle === "Deleted video" 
+                    || typeof videoTitle === 'undefined') {
+                        console.log ("Filter Video Error...");
+                        return;
+                    }
+                const videoTitleLowercase = videoTitle.toLowerCase();
+                return videoTitleLowercase.includes(searchTerm);
+            });
+
+            videoList.innerHTML = '';
+            videoCount = 0;
+            filteredVideos.forEach((item) => {
+                const videoTitle = item.snippet.title;
+                const channelName = item.snippet.videoOwnerChannelTitle;
+                const videoId = item.snippet.resourceId.videoId;
+                const videoLink = `https://www.youtube.com/watch?v=${videoId}`;
+                const videoThumbnail = item.snippet.thumbnails.medium.url;
+                const videoListItem = document.createElement('li');
+                videoListItem.innerHTML = `
+                    <a href="${videoLink}" target="_blank">
+                        <img src="${videoThumbnail}" alt="${videoTitle}">
+                        <div class="video-info">
+                            <a href="${videoLink}" target="_blank" class="video-link">${videoTitle}</a>
+                            <span class="channel-name">${channelName}</span>
+                        </div>
+                        
+                    </a>
+                `;
+                //<span>${videoTitle}</span>
+                videoList.appendChild(videoListItem);
+                videoCount ++;
+                //console.log("Count: " + videoCount);
+                videoCountElement.innerText = "No. of Videos: " + videoCount;
+            });
+        }
+
+        function filterVideosCSV() {
+            const searchTerm = searchBar.value.toLowerCase();
+            //console.log("Filtering CSV Data");
+            const filteredVideos = allVideos.filter((item,index) => {
+                if (index !== 0) {
+                    const parts = item.split(',');
+                    var videoTitle = parts.slice(0, parts.length - 2).join(',');
+                    videoTitle = videoTitle.replace(/"/g, '');
+                    //const videoTitle = item.snippet.title;
+                    if (videoTitle === "Private video" || videoTitle === "Deleted video" 
+                        || typeof videoTitle === 'undefined') {
+                            //console.log ("Filter Video Error...");
+                            //console.log(videoTitle);
+                            return;
+                        }
+                    const videoTitleLowercase = videoTitle.toLowerCase();
+                    return videoTitleLowercase.includes(searchTerm);
+
+                }
+                
+            });
+
+            videoList.innerHTML = '';
+            videoCount = 0;
+            var errorCount = 0;
+            filteredVideos.forEach((item, index) => {
+
+                const parts = item.split(',');
+                // Get the last three elements from the array in the desired order
+                var videoLink = parts[parts.length - 1];
+                videoLink = videoLink.replace(/"/g, '');
+                //console.log("link: " + videoLink);
+                var channelName = parts[parts.length - 2];
+                channelName = channelName.replace(/"/g, '');
+                //console.log(channelName);
+                var videoTitle = parts.slice(0, parts.length - 2).join(',');
+                videoTitle = videoTitle.replace(/"/g, '');
+                //console.log(videoTitle);
+                if (videoTitle === "Private video" || videoTitle === "Deleted video" 
+                    || typeof videoTitle === 'undefined'|| videoTitle == "Video Title") {
+                    //console.log(errorCount);
+                    errorCount++;
+                    return;
+                }
+
+                const videoListItem = document.createElement('li');
+                videoListItem.innerHTML = `
+                    <a href="${videoLink}" target="_blank">
+                        
+                        <div class="video-info">
+                            <a href="${videoLink}" target="_blank" class="video-link">${videoTitle} </a>
+                            <span class="channel-name">${channelName}</span>
+                        </div>
+                        
+                    </a>
+                    `;
+                    videoList.appendChild(videoListItem);
+                videoCount ++;
+                //console.log("Count: " + videoCount);
+                videoCountElement.innerText = "No. of Videos: " + videoCount;
+                
+                
+            });
+            console.log("Error Count: "+errorCount);
+        }
+
+        function filterChannels() {
+            const searchTerm = searchBar2.value.toLowerCase();
+            const filteredVideos = allVideos.filter((item) => {
+                const videoChannel = item.snippet.videoOwnerChannelTitle;
+                if (videoChannel === "Private video" || videoChannel === "Deleted video" 
+                    || typeof videoChannel === 'undefined') {
+                        console.log ("Filter Channel Error...");
+                        return;
+                    }
+                const videoChannelLowercase = videoChannel.toLowerCase();
+                return videoChannelLowercase.includes(searchTerm);
+            });
+
+            videoList.innerHTML = '';
+            videoCount = 0;
+            filteredVideos.forEach((item) => {
+                const videoTitle = item.snippet.title;
+                const channelName = item.snippet.videoOwnerChannelTitle;
+                const videoId = item.snippet.resourceId.videoId;
+                const videoLink = `https://www.youtube.com/watch?v=${videoId}`;
+                const videoThumbnail = item.snippet.thumbnails.medium.url;
+                const videoListItem = document.createElement('li');
+                videoListItem.innerHTML = `
+                    <a href="${videoLink}" target="_blank">
+                        <img src="${videoThumbnail}" alt="${videoTitle}">
+                        <div class="video-info">
+                            <a href="${videoLink}" target="_blank" class="video-link">${videoTitle}</a>
+                            <span class="channel-name">${channelName}</span>
+                        </div>
+                        
+                    </a>
+                `;
+                //<span>${videoTitle}</span>
+                videoList.appendChild(videoListItem);
+                videoCount ++;
+                //console.log("Count: " + videoCount);
+                videoCountElement.innerText = "No. of Videos: " + videoCount;
+            });
+        }
+
+
+        function filterChannelsCSV() {
+            const searchTerm = searchBar2.value.toLowerCase();
+            //console.log("Filtering CSV Data");
+            const filteredVideos = allVideos.filter((item,index) => {
+                if (index !== 0) {
+                    const parts = item.split(',');
+                    var channelName = parts[parts.length - 2];
+                    channelName = channelName.replace(/"/g, '');
+                    //const videoTitle = item.snippet.title;
+                    if (channelName === "Private video" || channelName === "Deleted video" 
+                        || typeof channelName === 'undefined'|| channelName === "Channel Name") {
+                            //console.log ("Filter Channel Error...");
+                            //console.log(channelName);
+                            return;
+                        }
+                    const channelNameLowercase = channelName.toLowerCase();
+                    return channelNameLowercase.includes(searchTerm);
+
+                }
+                
+            });
+
+            videoList.innerHTML = '';
+            videoCount = 0;
+            var errorCount = 0;
+            filteredVideos.forEach((item, index) => {
+
+                const parts = item.split(',');
+                // Get the last three elements from the array in the desired order
+                var videoLink = parts[parts.length - 1];
+                videoLink = videoLink.replace(/"/g, '');
+                //console.log("link: " + videoLink);
+                var channelName = parts[parts.length - 2];
+                channelName = channelName.replace(/"/g, '');
+                //console.log(channelName);
+                var videoTitle = parts.slice(0, parts.length - 2).join(',');
+                videoTitle = videoTitle.replace(/"/g, '');
+                //console.log(videoTitle);
+                if (videoTitle === "Private video" || videoTitle === "Deleted video" 
+                    || typeof videoTitle === 'undefined') {
+                    //console.log(errorCount);
+                    //console.log(item);
+                    errorCount++;
+                    return;
+                }
+
+                const videoListItem = document.createElement('li');
+                videoListItem.innerHTML = `
+                    <a href="${videoLink}" target="_blank">
+                        
+                        <div class="video-info">
+                            <a href="${videoLink}" target="_blank" class="video-link">${videoTitle} </a>
+                            <span class="channel-name">${channelName}</span>
+                        </div>
+                        
+                    </a>
+                    `;
+                    videoList.appendChild(videoListItem);
+                videoCount ++;
+                //console.log("Count: " + videoCount);
+                videoCountElement.innerText = "No. of Videos: " + videoCount;
+                
+                
+            });
+            console.log("Error Count: "+errorCount);
+        }
+
+
+        function downloadCSV(videos) {
+            const csvData = ['Video Title,Channel Name,Video URL']
+                .concat(videos.map((item) => {
+                    const videoTitle = item.snippet.title;
+                    /*
+                    if (videoTitle === "Private video" || videoTitle === "Deleted video" 
+                        || typeof videoTitle === 'undefined') {
+                            //console.log(errorCount);
+                            //console.log(videoTitle);
+                            //errorCount++;
+                            return;
+                        }
+                        */
+                    const channelName = item.snippet.videoOwnerChannelTitle;
+                    const videoId = item.snippet.resourceId.videoId;
+                    const videoLink = `https://www.youtube.com/watch?v=${videoId}`;
+                    return `"${videoTitle}","${channelName}","${videoLink}"`;
+                }))
+                .join('\n');
+
+            const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'youtube-playlist.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function downloadCSVFromCSVData(videos) {
+            const csvData = ['Video Title,Channel Name,Video URL']
+                .concat(videos.map((item) => {
+                        const parts = item.split(',');
+                        // Get the last three elements from the array in the desired order
+                        var videoTitle = parts.slice(0, parts.length - 2).join(',');
+                        videoTitle = videoTitle.replace(/"/g, '');
+                        /*
+                        if (videoTitle === "Private video" || videoTitle === "Deleted video" 
+                        || typeof videoTitle === 'undefined') {
+                            //console.log(errorCount);
+                            //console.log(videoTitle);
+                            //errorCount++;
+                            return;
+                        }
+                        */
+
+                        var videoLink = parts[parts.length - 1];
+                        videoLink = videoLink.replace(/"/g, '');
+                        //console.log("link: " + videoLink);
+                        var channelName = parts[parts.length - 2];
+                        channelName = channelName.replace(/"/g, '');
+                        //console.log(channelName);
+                        
+                    /*
+                    const videoTitle = item.snippet.title;
+                    const channelName = item.snippet.videoOwnerChannelTitle;
+                    const videoId = item.snippet.resourceId.videoId;
+                    const videoLink = `https://www.youtube.com/watch?v=${videoId}`;
+                    */
+                    return `"${videoTitle}","${channelName}","${videoLink}"`;
+                }))
+                .join('\n');
+
+            const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'youtube-playlist.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+
+
+    </script>
+</body>
+</html>
